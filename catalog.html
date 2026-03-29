@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Katalog | ARVIN</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #FFFFFF;
+            color: #000000;
+            font-family: 'Inter', 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.4;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=Poppins:wght@400;500;600;700;800&display=swap');
+
+        @keyframes fadeUp {
+            0% {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 28px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1.8rem;
+            letter-spacing: -0.02em;
+            text-decoration: none;
+            color: #000;
+            transition: opacity 0.2s ease;
+        }
+        .logo:hover {
+            opacity: 0.7;
+        }
+
+        .page-header {
+            margin-bottom: 48px;
+            text-align: center;
+            animation: fadeUp 0.6s ease-out forwards;
+        }
+        .page-header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+        }
+        .page-header p {
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            color: #4a4a4a;
+        }
+
+        .catalog-grid {
+            display: flex;
+            justify-content: center;
+            padding: 20px 0 60px;
+            animation: fadeUp 0.6s ease-out forwards;
+            animation-delay: 0.1s;
+            opacity: 0;
+            animation-fill-mode: forwards;
+        }
+
+        .product-card {
+            background: #FFFFFF;
+            border-radius: 28px;
+            padding: 32px 24px 28px;
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            border: 1px solid #f0f0f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            max-width: 400px;
+            width: 100%;
+        }
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 24px 40px -16px rgba(0,0,0,0.12);
+            border-color: #e0e0e0;
+        }
+
+        .card-image {
+            background: #F8F8F8;
+            border-radius: 24px;
+            padding: 32px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        .card-image img {
+            max-width: 100%;
+            width: 180px;
+            height: auto;
+            filter: drop-shadow(0 8px 14px rgba(0,0,0,0.08));
+        }
+        .product-card:hover .card-image {
+            background: #F5F5F5;
+        }
+
+        .card-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.3px;
+        }
+        .card-price {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #000;
+        }
+        .card-desc {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            color: #5a5a5a;
+            line-height: 1.4;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+        .badge {
+            background: #f2f2f2;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 48px 20px 40px;
+            border-top: 1px solid #efefef;
+            margin-top: 40px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: #2c2c2c;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 20px;
+            }
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            .navbar {
+                padding: 20px 0;
+            }
+            .product-card {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <nav class="navbar">
+        <a href="index.html" class="logo">ARVIN</a>
+    </nav>
+
+    <div class="page-header">
+        <h1>Katalog</h1>
+        <p>Pilih Produk</p>
+    </div>
+
+    <div class="catalog-grid">
+        <a href="product.html?id=1" class="product-card">
+            <div class="card-image">
+                <img src="https://www.netcomputer.id/wp-content/uploads/2022/06/20220613_185123.jpg" alt="Laptop Asus A42F">
+            </div>
+            <div class="card-title">Laptop Asus A42F</div>
+            <div class="card-price">Rp 1.450.000</div>
+            <div class="card-desc">
+                <span class="badge">Garansi 1 Hari</span>
+                <span class="badge">No Baterai</span>
+                <span class="badge">Cas Ada</span>
+                <span class="badge">Part Original</span>
+            </div>
+        </a>
+    </div>
+</div>
+
+<footer class="footer">
+    ARVIN PHONE INDONESIA
+</footer>
+
+</body>
+</html>
