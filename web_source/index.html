@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+  <title>Arvin Phone — Admin Dashboard</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  
+  <style>
+  
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #000000;
+      --bg-surface: #0a0a0a;
+      --bg-elevated: #141414;
+      --bg-glass: rgba(10, 10, 10, 0.9);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-medium: rgba(255, 255, 255, 0.12);
+      --border-glow: rgba(255, 255, 255, 0.2);
+      --text-primary: #ffffff;
+      --text-secondary: #a1a1a1;
+      --text-tertiary: #6b6b6b;
+      --accent-glow: rgba(255, 255, 255, 0.15);
+      --space-8: 8px;
+      --space-12: 12px;
+      --space-16: 16px;
+      --space-20: 20px;
+      --space-24: 24px;
+      --space-32: 32px;
+      --space-40: 40px;
+      --space-48: 48px;
+      --space-64: 64px;
+      --radius-sm: 12px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-xl: 32px;
+      --radius-full: 9999px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+
+    .page-loader {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-primary);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      animation: loaderFadeOut 0.5s ease-out 2s forwards;
+    }
+
+    .loader-logo {
+      width: 100px;
+      height: 100px;
+      border-radius: var(--radius-lg);
+      object-fit: cover;
+      animation: logoReveal 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    @keyframes logoReveal {
+      0% { opacity: 0; transform: scale(0.85); }
+      40% { opacity: 1; transform: scale(1.02); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes loaderFadeOut {
+      0% { opacity: 1; visibility: visible; }
+      100% { opacity: 0; visibility: hidden; }
+    }
+
+
+    .animate-in {
+      opacity: 0;
+      animation: fadeUp 0.6s ease-out forwards;
+    }
+
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+
+    @keyframes fadeUp {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 var(--space-24);
+    }
+
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg-glass);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: var(--space-16) 0;
+    }
+
+    .navbar-content {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 var(--space-24);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo-wrapper {
+      display: flex;
+      align-items: center;
+      gap: var(--space-12);
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      object-fit: cover;
+    }
+
+    .logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    .admin-badge {
+      background: rgba(255, 255, 255, 0.06);
+      padding: var(--space-8) var(--space-16);
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      backdrop-filter: blur(10px);
+    }
+
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      margin-bottom: var(--space-8);
+      background: linear-gradient(135deg, #fff 0%, #c0c0c0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    h2 {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-24);
+      color: var(--text-primary);
+    }
+
+    .section-subtitle {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      font-weight: 400;
+      margin-bottom: var(--space-32);
+    }
+
+
+    .form-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: var(--space-32);
+      margin-bottom: var(--space-48);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.5);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-20);
+    }
+
+    .form-group {
+      position: relative;
+    }
+
+    .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--bg-elevated);
+      border: 1.5px solid var(--border-medium);
+      border-radius: var(--radius-md);
+      padding: 16px var(--space-16) 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: var(--text-primary);
+      transition: var(--transition);
+      outline: none;
+    }
+
+    .form-input:focus {
+      border-color: var(--text-secondary);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .form-label {
+      position: absolute;
+      left: var(--space-16);
+      top: 12px;
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+      transition: var(--transition);
+      pointer-events: none;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      font-weight: 500;
+    }
+
+    .form-input:focus + .form-label,
+    .form-input:not(:placeholder-shown) + .form-label {
+      top: 4px;
+      font-size: 0.65rem;
+      color: var(--text-secondary);
+    }
+
+    .form-input::placeholder {
+      opacity: 0;
+    }
+
+    textarea.form-input {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-8);
+      padding: 12px 28px;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: -0.01em;
+      transition: var(--transition);
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--text-primary);
+      color: var(--bg-primary);
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px -8px rgba(255, 255, 255, 0.2);
+      background: #f0f0f0;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-primary);
+      border: 1.5px solid var(--border-medium);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-elevated);
+      border-color: var(--border-glow);
+      transform: translateY(-2px);
+    }
+
+    .btn-small {
+      padding: 8px 16px;
+      font-size: 0.8rem;
+    }
+
+    .btn-danger {
+      color: #ff4d4d;
+      border-color: rgba(255, 77, 77, 0.2);
+    }
+
+    .btn-danger:hover {
+      background: rgba(255, 77, 77, 0.08);
+      border-color: #ff4d4d;
+    }
+
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-24);
+      margin-bottom: var(--space-48);
+    }
+
+    .product-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: var(--space-20);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      animation: cardFadeUp 0.5s ease-out forwards;
+      backdrop-filter: blur(10px);
+    }
+
+    .product-card:nth-child(1) { animation-delay: 0.1s; }
+    .product-card:nth-child(2) { animation-delay: 0.15s; }
+    .product-card:nth-child(3) { animation-delay: 0.2s; }
+    .product-card:nth-child(4) { animation-delay: 0.25s; }
+    .product-card:nth-child(5) { animation-delay: 0.3s; }
+    .product-card:nth-child(6) { animation-delay: 0.35s; }
+
+    @keyframes cardFadeUp {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .product-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-glow);
+      box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.6);
+      background: var(--bg-elevated);
+    }
+
+    .product-image {
+      width: 100%;
+      aspect-ratio: 1/1;
+      object-fit: cover;
+      border-radius: var(--radius-md);
+      background: var(--bg-elevated);
+      margin-bottom: var(--space-16);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .product-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-8);
+      color: var(--text-primary);
+    }
+
+    .product-price {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: var(--space-8);
+      background: linear-gradient(135deg, #fff 0%, #b0b0b0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .product-original-price {
+      font-size: 0.9rem;
+      color: var(--text-tertiary);
+      text-decoration: line-through;
+      margin-bottom: var(--space-4);
+    }
+
+    .product-stock {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-8);
+    }
+
+    .product-stock.out-of-stock {
+      color: #ff4d4d;
+    }
+
+    .product-description {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      margin-bottom: var(--space-16);
+      flex: 1;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: var(--space-8);
+      margin-top: var(--space-8);
+    }
+
+    .edit-panel {
+      margin-top: var(--space-16);
+      padding-top: var(--space-16);
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: var(--space-64) var(--space-24);
+      color: var(--text-tertiary);
+      font-size: 1rem;
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+    }
+
+    @media (max-width: 1024px) {
+      .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 var(--space-16);
+      }
+      
+      .navbar-content {
+        padding: 0 var(--space-16);
+      }
+      
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .form-group.full-width {
+        grid-column: span 1;
+      }
+      
+      .product-grid {
+        gap: var(--space-16);
+      }
+      
+      .form-container {
+        padding: var(--space-20);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .product-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .btn {
+        width: 100%;
+      }
+      
+      .card-actions {
+        flex-direction: column;
+      }
+      
+      .logo-text {
+        font-size: 1rem;
+      }
+    }
+
+    .mb-32 { margin-bottom: var(--space-32); }
+    .mt-48 { margin-top: var(--space-48); }
+    .text-center { text-align: center; }
+    .w-full { width: 100%; }
+  </style>
+</head>
+<body>
+
+<div class="page-loader">
+  <img src="arvin.jpg" alt="Arvin" class="loader-logo">
+</div>
+
+<nav class="navbar">
+  <div class="navbar-content">
+    <div class="logo-wrapper">
+      <img src="arvin.jpg" alt="Arvin" class="logo-icon">
+      <span class="logo-text">ARVIN PHONE</span>
+    </div>
+    <span class="admin-badge">Admin Panel</span>
+  </div>
+</nav>
+
+<main class="container mt-48">
+  
+  <div class="animate-in delay-1">
+    <h1>Manajemen Produk</h1>
+    <p class="section-subtitle">Kelola katalog dengan presisi dan elegansi.</p>
+  </div>
+  
+  <div class="form-container animate-in delay-2">
+    <form id="productForm" onsubmit="return false;">
+      <div class="form-grid">
+        <div class="form-group full-width">
+          <input type="text" id="prodImage" class="form-input" placeholder=" " value="">
+          <label for="prodImage" class="form-label">URL Gambar</label>
+        </div>
+        
+        <div class="form-group">
+          <input type="text" id="prodTitle" class="form-input" placeholder=" " required>
+          <label for="prodTitle" class="form-label">Nama Produk</label>
+        </div>
+        
+        <div class="form-group">
+          <input type="text" id="prodPrice" class="form-input" placeholder=" " required>
+          <label for="prodPrice" class="form-label">Harga</label>
+        </div>
+        
+        <div class="form-group">
+          <input type="text" id="prodOriginalPrice" class="form-input" placeholder=" ">
+          <label for="prodOriginalPrice" class="form-label">Harga Asli (Opsional)</label>
+        </div>
+
+        <div class="form-group">
+          <input type="number" id="prodStock" class="form-input" placeholder=" " value="0" min="0">
+          <label for="prodStock" class="form-label">Stok Produk</label>
+        </div>
+        
+        <div class="form-group full-width">
+          <textarea id="prodDesc" class="form-input" placeholder=" " rows="3"></textarea>
+          <label for="prodDesc" class="form-label">Deskripsi</label>
+        </div>
+      </div>
+      
+      <div style="display: flex; align-items: center; gap: var(--space-16); margin-top: var(--space-24); flex-wrap: wrap;">
+        <button type="submit" class="btn btn-primary" id="uploadBtn">
+          <span>📤</span> Tambah Produk
+        </button>
+        <span id="editHint" style="color: var(--text-tertiary); font-size: 0.85rem;"></span>
+      </div>
+    </form>
+  </div>
+  
+  <div class="animate-in delay-3">
+    <h2>📋 Katalog Produk</h2>
+  </div>
+  
+  <div id="productGrid" class="product-grid">
+    <div class="empty-state">Memuat produk...</div>
+  </div>
+  
+</main>
+
+<script>
+    
+  const firebaseConfig = {
+  apiKey: "AIzaSyBc9IX_AEFDNyiA2Klm4RGdbHYmqfXEbOc",
+  authDomain: "arvin-phone.firebaseapp.com",
+  databaseURL: "https://arvin-phone-default-rtdb.firebaseio.com",
+  projectId: "arvin-phone",
+  storageBucket: "arvin-phone.firebasestorage.app",
+  messagingSenderId: "851488823602",
+  appId: "1:851488823602:web:0fd531f3be832de2e45f2b",
+};
+  
+  firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
+  const productsRef = database.ref('products');
+  
+  let currentEditId = null;
+  const imgInput = document.getElementById('prodImage');
+  const titleInput = document.getElementById('prodTitle');
+  const priceInput = document.getElementById('prodPrice');
+  const descInput = document.getElementById('prodDesc');
+  
+  const originalPriceInput = document.getElementById('prodOriginalPrice');
+  const stockInput = document.getElementById('prodStock');
+  const uploadBtn = document.getElementById('uploadBtn');
+  const editHint = document.getElementById('editHint');
+  const gridContainer = document.getElementById('productGrid');
+  
+
+  function resetForm() {
+    imgInput.value = '';
+    titleInput.value = '';
+    priceInput.value = '';
+    descInput.value = '';
+    
+    originalPriceInput.value = '';
+    stockInput.value = '0';
+    currentEditId = null;
+    editHint.textContent = '';
+    uploadBtn.innerHTML = '<span>📤</span> Tambah Produk';
+  }
+  
+  function populateForm(product) {
+    imgInput.value = product.image || '';
+    titleInput.value = product.title || '';
+    priceInput.value = product.price || '';
+    descInput.value = product.description || '';
+    
+    originalPriceInput.value = product.originalPrice || '';
+    stockInput.value = product.stock !== undefined ? product.stock : 0;
+  }
+  
+  function renderProducts(snapshot) {
+    const data = snapshot.val();
+    gridContainer.innerHTML = '';
+    
+    if (!data) {
+      gridContainer.innerHTML = '<div class="empty-state">✨ Belum ada produk. Tambahkan produk pertama Anda.</div>';
+      return;
+    }
+    
+    const entries = Object.entries(data);
+    
+    entries.forEach(([id, product]) => {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.setAttribute('data-id', id);
+      
+      const img = document.createElement('img');
+      img.className = 'product-image';
+      img.src = product.image || 'https://placehold.co/400x400/141414/ffffff?text=ARVIN';
+      img.alt = product.title;
+      img.onerror = () => { img.src = 'https://placehold.co/400x400/141414/ffffff?text=ARVIN'; };
+      
+      const title = document.createElement('h3');
+      title.className = 'product-title';
+      title.textContent = product.title || 'Tanpa Nama';
+      
+      const price = document.createElement('div');
+      price.className = 'product-price';
+      price.textContent = product.price || '—';
+      
+      if (product.originalPrice) {
+        const originalPrice = document.createElement('div');
+        originalPrice.className = 'product-original-price';
+        originalPrice.textContent = product.originalPrice;
+        card.appendChild(originalPrice);
+      }
+
+      const stock = document.createElement('div');
+      stock.className = 'product-stock';
+      const stockValue = product.stock !== undefined ? product.stock : 0;
+      if (stockValue === 0) {
+        stock.textContent = 'Stok Habis';
+        stock.classList.add('out-of-stock');
+      } else {
+        stock.textContent = `Stok: ${stockValue}`;
+      }
+      
+      const desc = document.createElement('p');
+      desc.className = 'product-description';
+      desc.textContent = product.description || 'Tidak ada deskripsi.';
+      
+      const actions = document.createElement('div');
+      actions.className = 'card-actions';
+      
+      const editBtn = document.createElement('button');
+      editBtn.className = 'btn btn-secondary btn-small';
+      editBtn.textContent = '✎ Ubah';
+      
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'btn btn-secondary btn-small btn-danger';
+      deleteBtn.textContent = '🗑 Hapus';
+      
+      actions.appendChild(editBtn);
+      actions.appendChild(deleteBtn);
+      
+      const editPanel = document.createElement('div');
+      editPanel.className = 'edit-panel';
+      editPanel.style.display = 'none';
+      editPanel.innerHTML = `
+        <div class="form-group" style="margin-bottom: 12px;">
+          <input type="text" class="edit-img form-input" value="${product.image || ''}" placeholder=" " style="padding: 12px 12px 6px;">
+          <label class="form-label">URL Gambar</label>
+        </div>
+        <div class="form-group" style="margin-bottom: 12px;">
+          <input type="text" class="edit-title form-input" value="${product.title || ''}" placeholder=" " style="padding: 12px 12px 6px;">
+          <label class="form-label">Nama</label>
+        </div>
+        <div class="form-group" style="margin-bottom: 12px;">
+          <input type="text" class="edit-price form-input" value="${product.price || ''}" placeholder=" " style="padding: 12px 12px 6px;">
+          <label class="form-label">Harga</label>
+        </div>
+        <!-- NEW: edit original price -->
+        <div class="form-group" style="margin-bottom: 12px;">
+          <input type="text" class="edit-original-price form-input" value="${product.originalPrice || ''}" placeholder=" " style="padding: 12px 12px 6px;">
+          <label class="form-label">Harga Asli</label>
+        </div>
+        <!-- NEW: edit stock -->
+        <div class="form-group" style="margin-bottom: 12px;">
+          <input type="number" class="edit-stock form-input" value="${product.stock !== undefined ? product.stock : 0}" placeholder=" " min="0" style="padding: 12px 12px 6px;">
+          <label class="form-label">Stok</label>
+        </div>
+        <div class="form-group" style="margin-bottom: 16px;">
+          <textarea class="edit-desc form-input" rows="2" style="padding: 12px 12px 6px;">${product.description || ''}</textarea>
+          <label class="form-label">Deskripsi</label>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-primary btn-small save-edit-btn">✓ Simpan</button>
+          <button class="btn btn-secondary btn-small cancel-edit-btn">✕ Batal</button>
+        </div>
+      `;
+      
+      card.appendChild(img);
+      card.appendChild(title);
+      card.appendChild(price);
+
+      if (product.originalPrice) {
+          
+      }
+      card.appendChild(stock);
+      card.appendChild(desc);
+      card.appendChild(actions);
+      card.appendChild(editPanel);
+      
+      gridContainer.appendChild(card);
+      
+      
+      editBtn.addEventListener('click', () => {
+        const isVisible = editPanel.style.display === 'block';
+        document.querySelectorAll('.edit-panel').forEach(panel => panel.style.display = 'none');
+        editPanel.style.display = isVisible ? 'none' : 'block';
+      });
+      
+
+      editPanel.querySelector('.cancel-edit-btn').addEventListener('click', () => {
+        editPanel.style.display = 'none';
+      });
+      
+
+      editPanel.querySelector('.save-edit-btn').addEventListener('click', async () => {
+        const newImg = editPanel.querySelector('.edit-img').value.trim();
+        const newTitle = editPanel.querySelector('.edit-title').value.trim();
+        const newPrice = editPanel.querySelector('.edit-price').value.trim();
+        const newDesc = editPanel.querySelector('.edit-desc').value.trim();
+
+        const newOriginalPrice = editPanel.querySelector('.edit-original-price').value.trim();
+        const newStock = parseInt(editPanel.querySelector('.edit-stock').value) || 0;
+        
+        if (!newTitle || !newPrice) {
+          alert('Nama dan harga wajib diisi');
+          return;
+        }
+        
+        try {
+          await productsRef.child(id).update({
+            image: newImg,
+            title: newTitle,
+            price: newPrice,
+            description: newDesc,
+            
+            originalPrice: newOriginalPrice || null,
+            stock: newStock
+          });
+          editPanel.style.display = 'none';
+          if (currentEditId === id) resetForm();
+        } catch (error) {
+          alert('Gagal memperbarui: ' + error.message);
+        }
+      });
+      
+      
+      deleteBtn.addEventListener('click', async () => {
+        if (!confirm(`Hapus produk "${product.title}"?`)) return;
+        
+        try {
+          await productsRef.child(id).remove();
+          if (currentEditId === id) resetForm();
+        } catch (error) {
+          alert('Gagal menghapus: ' + error.message);
+        }
+      });
+      
+     
+      editBtn.addEventListener('dblclick', () => {
+        populateForm(product);
+        currentEditId = id;
+        editHint.textContent = `✏️ Mengedit: ${product.title}`;
+        uploadBtn.innerHTML = '<span>✏️</span> Perbarui Produk';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+  }
+  
+
+  productsRef.on('value', renderProducts, (error) => {
+    gridContainer.innerHTML = `<div class="empty-state">Error: ${error.message}</div>`;
+  });
+  
+
+  document.getElementById('productForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const image = imgInput.value.trim();
+    const title = titleInput.value.trim();
+    const price = priceInput.value.trim();
+    const description = descInput.value.trim();
+
+    const originalPrice = originalPriceInput.value.trim();
+    const stock = parseInt(stockInput.value) || 0;
+    
+    if (!title || !price) {
+      alert('Nama produk dan harga wajib diisi');
+      return;
+    }
+    
+    const productData = { 
+      image, 
+      title, 
+      price, 
+      description,
+
+      originalPrice: originalPrice || null,
+      stock: stock
+    };
+    
+    try {
+      if (currentEditId) {
+        await productsRef.child(currentEditId).update(productData);
+      } else {
+        await productsRef.push(productData);
+      }
+      resetForm();
+    } catch (error) {
+      alert('Operasi gagal: ' + error.message);
+    }
+  });
+  
+
+  resetForm();
+</script>
+
+</body>
+</html>
